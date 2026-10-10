@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +68,89 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: Ord,
+    {
+        let mut list_a = list_a;
+        let mut list_b = list_b;
+
+        let mut result = LinkedList::new();
+
+        let mut pa = list_a.start;
+        let mut pb = list_b.start;
+
+        while pa.is_some() && pb.is_some() {
+            unsafe {
+                let a = pa.unwrap();
+                let b = pb.unwrap();
+
+                if a.as_ref().val <= b.as_ref().val {
+                    pa = (*a.as_ptr()).next;
+
+                    (*a.as_ptr()).next = None;
+
+                    if result.start.is_none() {
+                        result.start = Some(a);
+                    } else {
+                        (*result.end.unwrap().as_ptr()).next = Some(a);
+                    }
+
+                    result.end = Some(a);
+                    result.length += 1;
+                } else {
+                    pb = (*b.as_ptr()).next;
+
+                    (*b.as_ptr()).next = None;
+
+                    if result.start.is_none() {
+                        result.start = Some(b);
+                    } else {
+                        (*result.end.unwrap().as_ptr()).next = Some(b);
+                    }
+
+                    result.end = Some(b);
+                    result.length += 1;
+                }
+            }
         }
-	}
+
+        // A 剩余节点
+        while let Some(a) = pa {
+            unsafe {
+                pa = (*a.as_ptr()).next;
+                (*a.as_ptr()).next = None;
+
+                if result.start.is_none() {
+                    result.start = Some(a);
+                } else {
+                    (*result.end.unwrap().as_ptr()).next = Some(a);
+                }
+
+                result.end = Some(a);
+                result.length += 1;
+            }
+        }
+
+        // B 剩余节点
+        while let Some(b) = pb {
+            unsafe {
+                pb = (*b.as_ptr()).next;
+                (*b.as_ptr()).next = None;
+
+                if result.start.is_none() {
+                    result.start = Some(b);
+                } else {
+                    (*result.end.unwrap().as_ptr()).next = Some(b);
+                }
+
+                result.end = Some(b);
+                result.length += 1;
+            }
+        }
+
+        result
+    }
 }
 
 impl<T> Display for LinkedList<T>

@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,22 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+
+        let mut idx = self.count;
+
+        // 新元素从末尾开始，逐步与父节点比较
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+
+            if !(self.comparator)(&self.items[idx], &self.items[parent]) {
+                break; // 当前元素不比父节点优先，位置合适了
+            }
+
+            self.items.swap(idx, parent);
+            idx = parent;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +71,20 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        // 只有左孩子
+        if right > self.count {
+            return left;
+        }
+
+        // 两个孩子都在，用比较器决定选谁
+        if (self.comparator)(&self.items[right], &self.items[left]) {
+            right
+        } else {
+            left
+        }
     }
 }
 
@@ -84,8 +110,29 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        // 取走下标 1 的堆顶，用末尾元素填补这个位置
+        let top = self.items.swap_remove(1);
+        self.count -= 1;
+
+        let mut idx = 1;
+
+        // 把补到根部的元素逐步向下调整
+        while self.children_present(idx) {
+            let child = self.smallest_child_idx(idx);
+
+            if !(self.comparator)(&self.items[child], &self.items[idx]) {
+                break; // 最优的孩子都不比当前节点优先，已经调整好了
+            }
+
+            self.items.swap(idx, child);
+            idx = child;
+        }
+
+        Some(top)
     }
 }
 

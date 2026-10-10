@@ -3,10 +3,51 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
 
-fn sort<T>(array: &mut [T]){
-	//TODO
+fn sort<T: Ord>(array: &mut [T]) {
+    fn sift_down<T: Ord>(array: &mut [T], mut root: usize, end: usize) {
+        loop {
+            let left = root * 2 + 1;
+
+            // 没有子节点
+            if left >= end {
+                break;
+            }
+
+            let right = left + 1;
+            let mut largest = left;
+
+            // 找左右子节点中较大的一个
+            if right < end && array[right] > array[left] {
+                largest = right;
+            }
+
+            // 父节点已经不小于子节点，满足最大堆
+            if array[root] >= array[largest] {
+                break;
+            }
+
+            array.swap(root, largest);
+            root = largest;
+        }
+    }
+
+    let len = array.len();
+
+    if len < 2 {
+        return;
+    }
+
+    // 第一步：建立最大堆
+    for root in (0..len / 2).rev() {
+        sift_down(array, root, len);
+    }
+
+    // 第二步：不断把最大值放到数组末尾
+    for end in (1..len).rev() {
+        array.swap(0, end);
+        sift_down(array, 0, end);
+    }
 }
 #[cfg(test)]
 mod tests {
